@@ -1,4 +1,5 @@
 ﻿using AbySalto.Junior.Domain.Entities;
+using AbySalto.Junior.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace AbySalto.Junior.Infrastructure.Database

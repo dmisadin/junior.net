@@ -1,7 +1,7 @@
 ﻿using AbySalto.Junior.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AbySalto.Junior.Infrastructure.Database;
+namespace AbySalto.Junior.Domain.Interfaces;
 
 public interface IApplicationDbContext
 {
