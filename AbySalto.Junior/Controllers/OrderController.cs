@@ -1,5 +1,6 @@
 ﻿using AbySalto.Junior.Application.Dtos;
 using AbySalto.Junior.Application.Services;
+using AbySalto.Junior.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AbySalto.Junior.Controllers;
@@ -16,9 +17,9 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<OrderDto>>> GetAll([FromQuery] bool sortByTotal = false)
+    public async Task<ActionResult<List<OrderDto>>> GetAll([FromQuery] OrderSort sort = OrderSort.None)
     {
-        var orders = await this.orderService.GetAllAsync(sortByTotal);
+        var orders = await this.orderService.GetAllAsync(sort);
         return Ok(orders);
     }
 
@@ -26,7 +27,11 @@ public class OrderController : ControllerBase
     public async Task<ActionResult<OrderDto>> GetById(int id)
     {
         var order = await this.orderService.GetByIdAsync(id);
-        return order is null ? NotFound() : Ok(order);
+
+        if (order == null)
+            return NotFound();
+        
+        return Ok(order);
     }
 
     [HttpPost]
@@ -40,6 +45,10 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateOrderStatusDto dto)
     {
         var updated = await this.orderService.UpdateStatusAsync(id, dto);
-        return updated ? NoContent() : NotFound();
+
+        if (updated)
+            return NoContent();
+
+        return NotFound();
     }
 }

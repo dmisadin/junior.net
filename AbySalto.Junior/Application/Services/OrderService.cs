@@ -1,5 +1,6 @@
 ﻿using AbySalto.Junior.Application.Dtos;
 using AbySalto.Junior.Domain.Entities;
+using AbySalto.Junior.Domain.Enums;
 using AbySalto.Junior.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -15,7 +16,16 @@ public class OrderService : IOrderService
         this.context = context;
     }
 
-    public async Task<IEnumerable<OrderDto>> GetAllAsync(bool sortByTotal = false)
+    public async Task<IEnumerable<OrderDto>> GetAllAsync(OrderSort sort = OrderSort.None)
+    {
+        var query = context.Orders
+            .AsNoTracking()
+            .Select(MapToDto());
+
+        query = ApplySorting(query, sort);
+
+        return await query.ToListAsync();
+    }
     {
         var query = context.Orders.Select(MapToDto());
 
@@ -76,6 +86,17 @@ public class OrderService : IOrderService
     }
 
 
+
+    private static IQueryable<OrderDto> ApplySorting(IQueryable<OrderDto> query, OrderSort sort)
+    {
+        return sort switch
+        {
+            OrderSort.TotalAsc => query.OrderBy(o => o.TotalAmount),
+            OrderSort.TotalDesc => query.OrderByDescending(o => o.TotalAmount),
+            _ => query
+        };
+    }
+
     private async Task<List<Product>> ResolveProductsAsync(List<int> productIds)
     {
         var products = await this.context.Products
@@ -101,6 +122,7 @@ public class OrderService : IOrderService
             PaymentMethod = o.PaymentMethod.ToString(),
             Currency = o.Currency.ToString(),
             Note = o.Note,
+
             TotalAmount = o.Items.Sum(i => i.Quantity * i.UnitPrice),
 
             Items = o.Items.Select(i => new OrderItemDto
