@@ -23,6 +23,13 @@ public class OrderController : ControllerBase
         return Ok(orders);
     }
 
+    [HttpGet("[action]/{customerId}")]
+    public async Task<ActionResult<List<OrderDto>>> GetAllForCustomer(int customerId, [FromQuery] OrderSort sort = OrderSort.None)
+    {
+        var orders = await this.orderService.GetAllForCustomerAsync(customerId, sort);
+        return Ok(orders);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<OrderDto>> GetById(int id)
     {

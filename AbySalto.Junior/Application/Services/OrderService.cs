@@ -26,11 +26,15 @@ public class OrderService : IOrderService
 
         return await query.ToListAsync();
     }
-    {
-        var query = context.Orders.Select(MapToDto());
 
-        if (sortByTotal)
-            query = query.OrderByDescending(o => o.TotalAmount);
+    public async Task<IEnumerable<OrderDto>> GetAllForCustomerAsync(int customerId, OrderSort sort = OrderSort.None)
+    {
+        var query = context.Orders
+            .AsNoTracking()
+            .Where(o => o.CustomerId == customerId)
+            .Select(MapToDto());
+
+        query = ApplySorting(query, sort);
 
         return await query.ToListAsync();
     }
