@@ -1,5 +1,6 @@
 
 using AbySalto.Junior.Application.Services;
+using AbySalto.Junior.Domain.Interfaces;
 using AbySalto.Junior.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -27,6 +28,13 @@ namespace AbySalto.Junior
             builder.Services.AddApplicationServices();
 
             var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                using var scope = app.Services.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate();
+            }
 
             if (app.Environment.IsDevelopment())
             {
