@@ -3,7 +3,6 @@ using AbySalto.Junior.Domain.Entities;
 using AbySalto.Junior.Domain.Enums;
 using AbySalto.Junior.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace AbySalto.Junior.Application.Services;
 
@@ -20,7 +19,7 @@ public class OrderService : IOrderService
     {
         var query = context.Orders
             .AsNoTracking()
-            .Select(MapToDto());
+            .Select(OrderDto.Projection());
 
         query = ApplySorting(query, sort);
 
@@ -32,7 +31,7 @@ public class OrderService : IOrderService
         var query = context.Orders
             .AsNoTracking()
             .Where(o => o.CustomerId == customerId)
-            .Select(MapToDto());
+            .Select(OrderDto.Projection());
 
         query = ApplySorting(query, sort);
 
@@ -43,7 +42,7 @@ public class OrderService : IOrderService
     {
         return await context.Orders
             .Where(o => o.Id == id)
-            .Select(MapToDto())
+            .Select(OrderDto.Projection())
             .FirstOrDefaultAsync();
     }
 
@@ -111,31 +110,5 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException("One or more products not found.");
 
         return products;
-    }
-
-    private static Expression<Func<Order, OrderDto>> MapToDto()
-    {
-        return o => new OrderDto
-        {
-            Id = o.Id,
-            CustomerName = o.Customer.FirstName + " " + o.Customer.LastName,
-            DeliveryAddress = o.Customer.DeliveryAddress,
-            ContactNumber = o.Customer.ContactNumber,
-            Status = o.Status.ToString(),
-            OrderedAt = o.OrderedAt,
-            PaymentMethod = o.PaymentMethod.ToString(),
-            Currency = o.Currency.ToString(),
-            Note = o.Note,
-
-            TotalAmount = o.Items.Sum(i => i.Quantity * i.UnitPrice),
-
-            Items = o.Items.Select(i => new OrderItemDto
-            {
-                ProductName = i.Product.Name,
-                Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice,
-                LineTotal = i.Quantity * i.UnitPrice
-            }).ToList()
-        };
     }
 }
